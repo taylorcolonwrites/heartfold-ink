@@ -1,0 +1,2 @@
+'use strict';
+const form=document.getElementById('customerAccountForm'),status=document.getElementById('status');form.onsubmit=async e=>{e.preventDefault();const button=e.submitter;button.disabled=true;try{const r=await fetch('/api/accounts/'+button.value,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(form)))}),d=await r.json();if(!r.ok)throw Error(d.error);status.textContent=d.message}catch(e){status.textContent=e.message}finally{button.disabled=false}};

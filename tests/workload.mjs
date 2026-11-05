@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {estimateMinutes,orderMinutes,workloadSummary} from '../public/modules/workload.mjs';
+const short={key:'letter',words:300},long={key:'book',words:6000};
+assert(estimateMinutes([long])>estimateMinutes([short])*8);
+assert(estimateMinutes([short],'complex')>estimateMinutes([short],'standard'));
+assert.equal(orderMinutes({estimated_minutes:45,items:[long]}),45);
+const orders=Array.from({length:12},(_,i)=>({status:'paid',estimated_minutes:60,items:[short]}));
+assert.equal(workloadSummary(orders,6).hours,12);assert.equal(workloadSummary(orders,6).weeks,2);assert.equal(workloadSummary(orders,0).weeks,null);
+assert.equal(workloadSummary([...orders,{status:'completed',estimated_minutes:5000,items:[long]},{status:'ready',estimated_minutes:120,items:[short]}],6).hours,12);
+assert.equal(workloadSummary([{status:'awaiting_confirmation',items:[long]}],6).commissions,0);
+console.log('Workload: length and complexity estimates, owner overrides, more than five orders, weekly planning and completed-work exclusion passed.');

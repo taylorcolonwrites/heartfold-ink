@@ -1,0 +1,1 @@
+export function GET(){return new Response('User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /account/\nDisallow: /studio/\nDisallow: /basket/\nDisallow: /checkout/\nDisallow: /customer-service/inbox/\nSitemap: https://heartfoldink.com/sitemap.xml\n',{headers:{'Content-Type':'text/plain; charset=utf-8'}})}

@@ -1,0 +1,9 @@
+.env
+.env.*
+data
+*.sqlite
+*.sqlite-*
+*snapshot*.json
+*backup*.json
+node_modules
+.git

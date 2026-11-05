@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+import {ownerTasks} from '../public/modules/owner-tasks.mjs';
+const order=(reference,status,extra={})=>({reference,status,contact:{customerName:'Fictional buyer'},items:[{needBy:'2026-11-20',format:'digital'}],...extra});
+let data={orders:[order('HI-review','awaiting_confirmation'),order('HI-write','writing',{confirmed_deadline:'2026-11-03'}),order('HI-later','paid',{start_after:'2026-11-12'}),order('HI-pay','awaiting_payment'),order('HI-done','completed')],support:{count:2},mail:[],checks:[]};
+let result=ownerTasks(data,'2026-11-04');assert.equal(result.tasks[0].id,'HI-write');assert(result.tasks[0].flag[0].includes('passed'));assert.equal(result.upcoming[0].id,'HI-later');assert.equal(result.waiting[0].id,'HI-pay');assert(!result.tasks.some(x=>['HI-later','HI-pay','HI-done'].includes(x.id)));assert(result.tasks.some(x=>x.id==='support'));
+data={...data,orders:data.orders.map(o=>o.reference==='HI-write'?{...o,status:'completed'}:o),support:{count:0}};result=ownerTasks(data,'2026-11-04');assert(!result.tasks.some(x=>['HI-write','support'].includes(x.id)));assert.equal(result.tasks[0].id,'HI-review');
+result=ownerTasks({orders:[order('HI-today','paid',{start_after:'2026-11-04',confirmed_deadline:'2026-11-04'})],support:{count:1},checks:[{ready:false}]},'2026-11-04');assert.equal(result.tasks[0].id,'HI-today');assert.equal(result.tasks[0].flag[0],'Due today');assert.equal(result.tasks.at(-1).id,'setup');
+result=ownerTasks({orders:[order('HI-post','ready',{items:[{needBy:'2026-11-20',format:'both'}]})]},'2026-11-04');assert(result.tasks[0].title[0].includes('post'));assert.deepEqual(ownerTasks({orders:[],support:{count:0},checks:[],mail:[]},'2026-11-04').tasks,[]);
+console.log('Owner next steps: overdue priority, scheduled work, payment waiting, support counts and automatic removal after completion passed.');

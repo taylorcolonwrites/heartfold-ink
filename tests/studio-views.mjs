@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {metrics,ordersTable,writingView,calendarView,overview} from '../public/modules/studio-views.mjs';
+const s=(en,no)=>en,esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const order={reference:'HI-TEST',status:'writing',contact:{customerName:'<img src=x>',customerEmail:'test@example.test'},items:[{key:'letter',words:300,format:'digital',needBy:'2026-11-20'}],confirmed_deadline:'2026-11-20',amount_minor:1200,payment_currency:'USD',estimated_minutes:120};
+const d={settings:{weeklyHours:20,acceptingRequests:true},support:{count:2},orders:[order,{...order,reference:'HI-NEW',status:'awaiting_confirmation',amount_minor:null}],checks:[],mail:[]};
+assert.equal(metrics(d).review,1);assert.equal(metrics(d).active,1);assert.equal(metrics(d).support,2);
+assert(ordersTable(d.orders,s,esc).includes('&lt;img src=x&gt;'));assert(!ordersTable(d.orders,s,esc).includes('<img src=x>'));assert(writingView(d,s,esc).includes('2 estimated hours'));assert(overview(d,s,esc).includes('hours'));assert(!overview(d,s,esc).includes('slots available'));assert(ordersTable([],s,esc).includes('No orders to show'));assert(calendarView(d,s,esc).includes('role="columnheader"'));assert(calendarView(d,s,esc).includes('Requested dates still need your confirmation.'));
+console.log('Workspace views: live metric derivation, escaped customer data, writing estimates, empty states and accessible calendar structure passed.');
+
+const {launchMarkup}=await import('../public/modules/launch.mjs');
+const checklist=launchMarkup({...d,checks:[{key:'payments',ready:false}],connections:{paymentMode:'test',webhookConfigured:false,emailConfigured:false}},s,esc);
+assert(checklist.includes('Next: Connect payments'));assert(checklist.includes('Test credentials configured'));assert(checklist.includes('messages stay queued'));assert(!checklist.includes('Your review is required'));
+const review=launchMarkup({...d,checks:[{key:'prices',ready:false}]},s,esc);assert(review.includes('Your review is required'));
+const {launchDestinations}=await import('../public/modules/launch.mjs');
+const {pricesMarkup,contentMarkup}=await import('../public/modules/website-editor.mjs');
+const {catalogue:products}=await import('../public/modules/catalogue.mjs');
+const config={revision:'initial',products:{letter:{...products.letter,name:['<script>alert(1)</script>','Brev']}}};
+assert(pricesMarkup(config,s,esc).includes('&lt;script&gt;'));
+assert(!pricesMarkup(config,s,esc).includes('<script>'));
+assert(contentMarkup({},s,esc).includes('pagesEditor'));
+assert.equal(launchDestinations.prices[0],'products');
+assert(review.includes('data-view="products"'));assert(review.includes('data-target="pricingEditor"'));

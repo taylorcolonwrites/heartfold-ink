@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {catalogue,rates,quote} from '../public/modules/catalogue.mjs';
+import {validateRequest} from '../public/order-policy.mjs';
+assert.equal(Object.keys(catalogue).length,11);
+assert.equal(quote({key:'letter',words:300,format:'digital'}).total,12);
+assert.equal(quote({key:'magic',words:500,format:'both',country:'uk'}).total,28);
+assert.throws(()=>quote({key:'book',words:3000,format:'physical',country:'uk'}));
+assert.throws(()=>quote({key:'letter',words:1,format:'digital'}));
+assert.equal(quote({key:'story',words:1000,format:'physical',country:'other'}).requiresQuote,true);
+assert.equal(quote({key:'letter',words:300,format:'physical',country:'uk',postService:'priority'}).requiresQuote,true);
+assert.equal(validateRequest({key:'continuation',words:300,format:'digital',needBy:'2027-02-01',occasionDate:'2027-02-02'},'2026-12-03'),'reply');
+console.log('Catalogue: fixed prices, delivery quotes, digital-only books and follow-up requirements passed.');

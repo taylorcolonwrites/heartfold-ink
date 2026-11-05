@@ -1,0 +1,15 @@
+# Store the real config outside source control with mode 0600.
+# Node 24: node --env-file=.env server.cjs
+APP_ORIGIN=https://heartfoldink.com
+DATA_DIR=./data
+HOST=127.0.0.1
+PORT=8787
+# Run create-owner.mjs to create a private config with an owner password hash.
+OWNER_PASSWORD_HASH=
+# Optional integrations; keep real values secret. Payments stay gated until tested.
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+RESEND_API_KEY=
+MAIL_FROM=
+# Trust only your reverse proxy's actual peer IPs; it must overwrite X-Real-IP.
+TRUSTED_PROXY_IPS=127.0.0.1,::1,::ffff:127.0.0.1
